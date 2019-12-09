@@ -35,6 +35,8 @@ import Todo from './Todo'
     }
 
     updateTodoToshow = (s) => {
+    let newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?'+s;
+    window.history.pushState({ path: newurl }, '', newurl);
         this.setState({
             todoToShow: s
         })
@@ -44,12 +46,27 @@ import Todo from './Todo'
          todos: this.state.todos.filter(todo => todo.id !== id)
      });
  };
-     // removeAllTodoThatAreComplete = () => {
-     //     this.setState({
-     //         todos: this.state.todos.filter(todo => !todo.complete)
-     //     });
-    // }
+componentDidMount(){
+let toShow =window.location.href.split("?");
+if(toShow.length >1){
+    this.setState({
+        todoToShow: toShow[1]
+    })
+}
+
+    localStorage.getItem("todoItems") && this.setState({
+        todos: JSON.parse(localStorage.getItem("todoItems"))
+
+    });
+};
+
+componentWillUpdate(nextProps,nextState){
+    localStorage.setItem("todoItems",JSON.stringify(nextState.todos));
+    localStorage.setItem("todoToShow",nextState.todoToShow);
+
+};
     render(){
+
         let todos = [];
         if(this.state.todoToShow === "all"){
             todos = this.state.todos;
@@ -62,7 +79,7 @@ import Todo from './Todo'
         return(
             <div>
                 <TodoForm onSubmit={this.addTodo}/>
-                {this.state.todos.map(
+                {todos.map(
                     todo => (
                         <Todo key={todo.id}
                               toggleComplete={() => this.toggleComplete(todo.id)}
@@ -79,12 +96,6 @@ import Todo from './Todo'
                     <button onClick={() => this.updateTodoToshow("active")}>active</button>
                     <button onClick={() => this.updateTodoToshow("complete")}>complete</button>
                 </div>
-                {/*{this.state.todos.some(todo => todo.complete)?*/}
-                {/*( <div>*/}
-                    {/*<button onClick={this.removeAllTodoThatAreComplete}>*/}
-                        {/*remove all complete todos*/}
-                    {/*</button>*/}
-                {/*</div>) : null}*/}
             </div>
         );
     }
